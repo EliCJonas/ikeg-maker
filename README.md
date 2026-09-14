@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  <i>Automatically generate `.ikeg` metadata files for **auro** package repositories.</i>
+  <i>Automatically generate `.ikeg` metadata files for auro package repositories.</i>
 </p>
 
 ## Overview
