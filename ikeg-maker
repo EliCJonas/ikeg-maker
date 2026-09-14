@@ -1,0 +1,58 @@
+#!/usr/bin/env python3
+"""Automatically generate .ikeg metadata files for auro-repo."""
+import argparse
+import json
+import sys
+from pathlib import Path
+
+
+def make_ikeg(name: str, version: str, author: str, description: str, download_url: str, repo_path: str = ""):
+    """Create a .ikeg file and add package to pkgs.list."""
+    if not repo_path:
+        repo_path = str(Path(__file__).resolve().parent.parent.parent / "auro-repo")
+    
+    pkgs_dir = Path(repo_path)
+    pkgs_dir.mkdir(parents=True, exist_ok=True)
+    
+    list_file = pkgs_dir / "pkgs.list"
+    
+    ikf = pkgs_dir / f"{name}.ikeg"
+    if ikf.exists():
+        print(f"Error: {name}.ikeg already exists", file=sys.stderr)
+        sys.exit(1)
+    
+    metadata = {
+        "name": name,
+        "version": version,
+        "author": author,
+        "description": description,
+        "download-url": download_url,
+    }
+    
+    ikf.write_text(json.dumps(metadata, indent=2) + "\n")
+    
+    existing = set()
+    if list_file.exists():
+        existing = {l.strip() for l in list_file.read_text().splitlines() if l.strip()}
+    
+    if name not in existing:
+        with open(list_file, "a") as f:
+            f.write(name + "\n")
+    
+    print(f"Created {name}.ikeg")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Automatically generate .ikeg metadata files for auro-repo")
+    parser.add_argument("name", help="Package name")
+    parser.add_argument("--version", default="0.1.0", help="Package version")
+    parser.add_argument("--author", default="", help="Package author")
+    parser.add_argument("--description", default="", help="Package description")
+    parser.add_argument("--url", default="", help="Download URL for the .keg archive")
+    parser.add_argument("--repo", default="", help="Path to the repo directory")
+    args = parser.parse_args()
+    make_ikeg(args.name, args.version, args.author, args.description, args.url, args.repo)
+
+
+if __name__ == "__main__":
+    main()
